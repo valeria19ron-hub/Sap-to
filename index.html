@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sapoto</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+  <link rel="stylesheet" href="ajustes.css">
+</head>
+<body>
+
+  <header>
+    <div class="header-izquierdo">
+      <img src="logo.jpg" alt="Logo" class="logo-esquina">
+    </div>
+
+    <nav class="barra-pestanas" id="main-nav" style="display: none;">
+      <button id="btn-tab-chat" class="pestana activa" onclick="cambiarPestana('chat')">Chat</button>
+      <button id="btn-tab-recompensas" class="pestana" onclick="cambiarPestana('recompensas')">Recompensas</button>
+      <button id="btn-tab-perfil" class="pestana" onclick="cambiarPestana('perfil')">Perfil</button>
+      <button id="btn-tab-reglas" class="pestana" onclick="cambiarPestana('reglas')">Regras</button>
+      <button id="btn-cerrar-sesion" class="pestana" onclick="cerrarSesion()" style="background-color: rgba(231, 76, 60, 0.85); color: white;">Sair</button>
+    </nav>
+
+    <div class="header-derecho">
+      <button id="btn-modo-oscuro" class="btn-toggle" onclick="alternarModoOscuro()" title="Alternar tema">💤</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- PANTALLA 1: REGISTRO -->
+    <section id="seccion-registro" class="tarjeta-contenedor">
+      <div class="contenido-registro">
+        <h2>Criar Conta</h2>
+        <p>Cadastre-se com as suas credenciais para acessar a plataforma.</p>
+        <form onsubmit="registrarUsuario(event)">
+          <div class="grupo-input">
+            <label for="correo">Usuário:</label>
+            <input type="text" id="correo" placeholder="Nome de usuário" required>
+          </div>
+          <div class="grupo-input">
+            <label for="password">Senha:</label>
+            <input type="password" id="password" placeholder="Sua senha" required>
+          </div>
+          <button type="submit" class="btn-primario">Cadastrar-se</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- PANTALLA 2: CHAT + GPS -->
+    <section id="seccion-chat" class="dashboard-grid" style="display: none;">
+      <div class="tarjeta-contenedor panel-chat">
+        <h3>Chat de Relatos</h3>
+        <div class="caja-mensajes" id="caja-mensajes">
+          <div class="mensaje sistema">
+            <p><strong>Sistema:</strong> Bem-vindo ao chat de monitoramento comunitário.</p>
+          </div>
+          <div class="mensaje usuario">
+            <p><strong>Usuário_412:</strong> O ônibus da linha 102 acabou de passar na Av. Central!</p>
+            <div class="verificacion-comunidad">
+              <span>Isso é verdade?</span>
+              <button class="btn-voto sim" onclick="alert('Obrigado pelo voto!')">Sim</button>
+              <button class="btn-voto nao" onclick="alert('Relato sob análise de fraude.')">Não</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="barra-envio">
+          <input type="text" id="input-mensaje" placeholder="Envie um relato sobre o seu ônibus..." onkeypress="enviarConEnter(event)">
+          <button class="btn-enviar" onclick="enviarMensaje()">Enviar</button>
+          <div class="indicador-puntos-rapido" onclick="cambiarPestana('recompensas')">
+            <span>150</span> pts
+          </div>
+        </div>
+      </div>
+
+      <div class="tarjeta-contenedor panel-gps">
+        <h3>GPS Ativo</h3>
+        <div class="mapa-simulado">
+          <div class="radar-gps"></div>
+          <p>Sua localização atual está dentro da cerca geográfica.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANTALLA 3: RECOMPENSAS -->
+    <section id="seccion-recompensas" class="tarjeta-contenedor" style="display: none;">
+      <h2>Catálogo de Prêmios</h2>
+      <div class="resumen-puntos">
+        <p>Você possui: <strong class="puntos-dinamicos">150</strong> pontos acumulados</p>
+      </div>
+      <ul class="lista-recompensas">
+        <li>
+          <span>Lanche Grátis (Parceiros)</span>
+          <button class="btn-canjear" onclick="alert('Cupom gerado!')">50 pts</button>
+        </li>
+        <li>
+          <span>Café da manhã no terminal</span>
+          <button class="btn-canjear" onclick="alert('Cupom gerado!')">30 pts</button>
+        </li>
+        <li>
+          <span>Liquidificador Portátil</span>
+          <button class="btn-canjear" disabled>500 pts</button>
+        </li>
+        <li>
+          <span>Forno Elétrico</span>
+          <button class="btn-canjear" disabled>1200 pts</button>
+        </li>
+      </ul>
+    </section>
+
+    <!-- PANTALLA 4: PERFIL -->
+    <section id="seccion-perfil" class="tarjeta-contenedor" style="display: none; max-width: 600px;">
+      <h2>Meu Perfil</h2>
+      
+      <!-- FOTO CUADRADA DE PERFIL -->
+      <img id="perf-foto" src="logo.jpg" alt="Foto de perfil" class="foto-perfil-cuadrada">
+
+      <div class="info-perfil">
+        <p><strong>Nome de Usuário:</strong> <span id="perf-email">usuario</span></p>
+        <p><strong>ID do Usuário:</strong> <span id="perf-id">#10024</span></p>
+        <p><strong>Pontuação:</strong> <span>150</span> pontos</p>
+      </div>
+
+      <div class="seccion-denuncias">
+        <h4>Histórico de Denúncias Contra Você</h4>
+        <div class="barra-progreso-contenedor">
+          <div class="barra-progreso-nivel" style="width: 10%;"></div>
+        </div>
+        <p class="subtexto-denuncias">0 / 3 infrações graves antes da suspensão automática.</p>
+      </div>
+    </section>
+
+    <!-- PANTALLA 5: REGLAS -->
+    <section id="seccion-reglas" class="tarjeta-contenedor panel-reglas" style="display: none; max-width: 800px; max-height: none;">
+      <h3>REGRAS DO SISTEMA</h3>
+      <div class="regla-item">
+        <h5>Cerca geográfica (Geofencing):</h5>
+        <p>O aplicativo só deve permitir que o usuário envie um relato sobre o ônibus se o GPS do celular dele comprovar que ele realmente está perto daquela rua ou daquela parada. Se ele estiver em casa, não poderá inventar que o ônibus passou no centro.</p>
+      </div>
+      <div class="regla-item">
+        <h5>Botão de confirmação:</h5>
+        <p>Quando um usuário avisa que o ônibus passou, a informação aparece na tela para os outros passageiros com a pergunta: "Isso é verdade?".</p>
+      </div>
+      <div class="regla-item">
+        <h5>Botões de "Sim" ou "Não":</h5>
+        <p>Se várias pessoas que estão na mesma região clicarem em "Não", o relato falso é apagado imediatamente e o usuário que mentiu perde pontos.</p>
+      </div>
+      <div class="regla-item">
+        <h5>Penalizações:</h5>
+        <p>Se o usuário enviar informações falsas, ele perde pontos acumulados e pode ter a conta suspensa, perdendo o direito de resgatar os prêmios (comidas ou eletrodomésticos).</p>
+      </div>
+      <div class="regla-item">
+        <h5>Bloqueio de spam:</h5>
+        <p>O sistema não deve permitir que o mesmo usuário envie 10 relatos seguidos em poucos minutos.</p>
+      </div>
+    </section>
+  </main>
+
+    <footer>
+    <p>© 2026 Sapōto Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    // 1. LISTA DE USUARIOS Y SUS FOTOS (Verifica que los nombres de archivo coincidan con tu carpeta)
+    const usuariosValidos = [
+      { usuario: "Eremika", contrasena: "Armin", foto: "eremika.jpg" },
+      { usuario: "Enrico", contrasena: "1234", foto: "enrico.jpg" },
+      { usuario: "Jose", contrasena: "eso1234", foto: "jose.jpg" }
+    ];
+
+    function obtenerFotoUsuario(nombre) {
+      const encontrado = usuariosValidos.find((u) => u.usuario === nombre);
+      return encontrado ? encontrado.foto : "logo.jpg";
+    }
+
+    // 2. CARGA AUTOMÁTICA AL ABRIR O RECARGAR LA PÁGINA
+    window.onload = function() {
+      cargarMensajesGuardados();
+      const usuarioGuardado = localStorage.getItem('usuarioActivo');
+      const idGuardado = localStorage.getItem('idActivo');
+
+      if (usuarioGuardado && idGuardado) {
+        iniciarSesionEnPantalla(usuarioGuardado, idGuardado);
+      }
+    };
+
+    // 3. INICIO DE SESIÓN
+    function registrarUsuario(event) {
+      event.preventDefault();
+      const usuarioIngresado = document.getElementById('correo').value.trim();
+      const contrasenaIngresada = document.getElementById('password').value.trim();
+
+      const usuarioEncontrado = usuariosValidos.find(
+        (u) => u.usuario === usuarioIngresado && u.contrasena === contrasenaIngresada
+      );
+
+      if (usuarioEncontrado) {
+        const nuevoId = '#' + Math.floor(Math.random() * 90000 + 10000);
+        localStorage.setItem('usuarioActivo', usuarioEncontrado.usuario);
+        localStorage.setItem('idActivo', nuevoId);
+        iniciarSesionEnPantalla(usuarioEncontrado.usuario, nuevoId);
+      } else {
+        alert('Usuário ou senha incorretos!');
+      }
+    }
+
+    function iniciarSesionEnPantalla(nombreUsuario, idUsuario) {
+      document.getElementById('perf-email').textContent = nombreUsuario;
+      document.getElementById('perf-id').textContent = idUsuario;
+      
+      // ESTA LÍNEA PONE LA FOTO CUADRADA EN EL PERFIL:
+      const imgPerfil = document.getElementById('perf-foto');
+      if (imgPerfil) {
+        imgPerfil.src = obtenerFotoUsuario(nombreUsuario);
+      }
+
+      document.getElementById('seccion-registro').style.display = 'none';
+      document.getElementById('main-nav').style.display = 'flex';
+      cambiarPestana('chat');
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('usuarioActivo');
+      localStorage.removeItem('idActivo');
+
+      const elementos = ['main-nav', 'seccion-chat', 'seccion-recompensas', 'seccion-perfil', 'seccion-reglas'];
+      elementos.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+
+      document.getElementById('correo').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('seccion-registro').style.display = 'block';
+    }
+
+    // 4. NAVEGACIÓN ENTRE PESTAÑAS
+    function cambiarPestana(pestanaSeleccionada) {
+      const pantallas = ['seccion-chat', 'seccion-recompensas', 'seccion-perfil', 'seccion-reglas'];
+      pantallas.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+
+      const botones = ['btn-tab-chat', 'btn-tab-recompensas', 'btn-tab-perfil', 'btn-tab-reglas'];
+      botones.forEach((id) => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove('activa');
+      });
+
+      if (pestanaSeleccionada === 'chat') {
+        document.getElementById('seccion-chat').style.display = 'grid';
+        document.getElementById('btn-tab-chat').classList.add('activa');
+        const caja = document.getElementById('caja-mensajes');
+        caja.scrollTop = caja.scrollHeight;
+      } else if (pestanaSeleccionada === 'recompensas') {
+        document.getElementById('seccion-recompensas').style.display = 'block';
+        document.getElementById('btn-tab-recompensas').classList.add('activa');
+      } else if (pestanaSeleccionada === 'perfil') {
+        document.getElementById('seccion-perfil').style.display = 'block';
+        document.getElementById('btn-tab-perfil').classList.add('activa');
+      } else if (pestanaSeleccionada === 'reglas') {
+        document.getElementById('seccion-reglas').style.display = 'block';
+        document.getElementById('btn-tab-reglas').classList.add('activa');
+      }
+    }
+
+    // 5. CHAT CON FOTOS CIRCULARES Y HISTORIAL COMPARTIDO
+    function enviarConEnter(event) {
+      if (event.key === 'Enter') {
+        enviarMensaje();
+      }
+    }
+
+    function enviarMensaje() {
+      const input = document.getElementById('input-mensaje');
+      const texto = input.value.trim();
+      if (texto === '') return;
+
+      const nombreUsuario = localStorage.getItem('usuarioActivo') || 'Usuário';
+      const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const historial = JSON.parse(localStorage.getItem('historialChat')) || [];
+      historial.push({ autor: nombreUsuario, texto: texto, hora: horaActual });
+      localStorage.setItem('historialChat', JSON.stringify(historial));
+
+      dibujarMensajeEnPantalla(nombreUsuario, texto, horaActual);
+      input.value = '';
+    }
+
+    function cargarMensajesGuardados() {
+      const historial = JSON.parse(localStorage.getItem('historialChat')) || [];
+      historial.forEach((msg) => {
+        dibujarMensajeEnPantalla(msg.autor, msg.texto, msg.hora);
+      });
+    }
+
+    function dibujarMensajeEnPantalla(autor, texto, hora) {
+      const cajaMensajes = document.getElementById('caja-mensajes');
+      const nuevoMensaje = document.createElement('div');
+      nuevoMensaje.className = 'mensaje usuario';
+      const fotoAutor = obtenerFotoUsuario(autor);
+      
+      nuevoMensaje.innerHTML = `
+        <div class="cabecera-mensaje">
+          <img src="${fotoAutor}" alt="${autor}" class="foto-chat-circular">
+          <strong>${autor}</strong>
+          <span style="font-size: 0.75rem; color: #888;">(${hora})</span>
+        </div>
+        <p style="margin: 0 0 6px 0;">${texto}</p>
+        <div class="verificacion-comunidad">
+          <span>Isso é verdade?</span>
+          <button class="btn-voto sim" onclick="alert('Obrigado pelo voto!')">Sim</button>
+          <button class="btn-voto nao" onclick="alert('Relato sob análise de fraude.')">Não</button>
+        </div>
+      `;
+
+      cajaMensajes.appendChild(nuevoMensaje);
+      cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
+    }
+
+    // 6. MODO OSCURO
+    function alternarModoOscuro() {
+      document.body.classList.toggle('dark-mode');
+      const boton = document.getElementById('btn-modo-oscuro');
+      boton.textContent = document.body.classList.contains('dark-mode') ? '🕶️' : '💤';
+    }
+  </script>
+</body>
+</html>
+
