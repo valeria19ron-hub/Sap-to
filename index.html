@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>sapoto</title>
+  <title>Sapōto</title>
   <link rel="icon" type="image/jpeg" href="logo.jpg">
   <link rel="stylesheet" href="ajustes.css">
 </head>
@@ -56,20 +56,24 @@
             <p><strong>Sistema:</strong> Bem-vindo ao chat de monitoramento comunitário.</p>
           </div>
           <div class="mensaje usuario">
-            <p><strong>Usuário_412:</strong> O ônibus da linha 102 acabou de passar na Av. Central!</p>
+            <div class="cabecera-mensaje">
+              <img src="logo.jpg" alt="Usuário_412" class="foto-chat-circular">
+              <strong>Usuário_412</strong>
+            </div>
+            <p style="margin: 0 0 6px 0;">O ônibus da linha 102 acabou de passar na Av. Central!</p>
             <div class="verificacion-comunidad">
               <span>Isso é verdade?</span>
-              <button class="btn-voto sim" onclick="alert('Obrigado pelo voto!')">Sim</button>
-              <button class="btn-voto nao" onclick="alert('Relato sob análise de fraude.')">Não</button>
+              <button class="btn-voto sim" onclick="votarSim(this)">Sim (<span>0</span>)</button>
+              <button class="btn-voto nao" onclick="votarNao(this)">Não (<span>0</span>)</button>
             </div>
           </div>
         </div>
 
         <div class="barra-envio">
-          <input type="text" id="input-mensaje" placeholder="Envie um relato sobre o seu ônibus..." onkeypress="enviarConEnter(event)">
+          <input type="text" id="input-mensaje" placeholder="Envie um relato sobre o seu ônibus (+10 pts)..." onkeypress="enviarConEnter(event)">
           <button class="btn-enviar" onclick="enviarMensaje()">Enviar</button>
           <div class="indicador-puntos-rapido" onclick="cambiarPestana('recompensas')">
-            <span>150</span> pts
+            <span class="puntos-usuario">150</span> pts
           </div>
         </div>
       </div>
@@ -87,24 +91,24 @@
     <section id="seccion-recompensas" class="tarjeta-contenedor" style="display: none;">
       <h2>Catálogo de Prêmios</h2>
       <div class="resumen-puntos">
-        <p>Você possui: <strong class="puntos-dinamicos">150</strong> pontos acumulados</p>
+        <p>Você possui: <strong class="puntos-usuario">150</strong> pontos acumulados</p>
       </div>
       <ul class="lista-recompensas">
         <li>
           <span>Lanche Grátis (Parceiros)</span>
-          <button class="btn-canjear" onclick="alert('Cupom gerado!')">50 pts</button>
+          <button class="btn-canjear" onclick="canjearPremio(50, 'Lanche Grátis')">50 pts</button>
         </li>
         <li>
           <span>Café da manhã no terminal</span>
-          <button class="btn-canjear" onclick="alert('Cupom gerado!')">30 pts</button>
+          <button class="btn-canjear" onclick="canjearPremio(30, 'Café da manhã')">30 pts</button>
         </li>
         <li>
           <span>Liquidificador Portátil</span>
-          <button class="btn-canjear" disabled>500 pts</button>
+          <button class="btn-canjear" onclick="canjearPremio(500, 'Liquidificador Portátil')">500 pts</button>
         </li>
         <li>
           <span>Forno Elétrico</span>
-          <button class="btn-canjear" disabled>1200 pts</button>
+          <button class="btn-canjear" onclick="canjearPremio(1200, 'Forno Elétrico')">1200 pts</button>
         </li>
       </ul>
     </section>
@@ -114,12 +118,12 @@
       <h2>Meu Perfil</h2>
       
       <!-- FOTO CUADRADA DE PERFIL -->
-      <img id="perf-foto" src="logo.jpg" alt="Foto de perfil" class="foto-perfil-cuadrada">
+      <img id="perf-foto" src="logo.jpg" onerror="this.src='logo.jpg'" alt="Foto de perfil" class="foto-perfil-cuadrada">
 
       <div class="info-perfil">
         <p><strong>Nome de Usuário:</strong> <span id="perf-email">usuario</span></p>
         <p><strong>ID do Usuário:</strong> <span id="perf-id">#10024</span></p>
-        <p><strong>Pontuação:</strong> <span>150</span> pontos</p>
+        <p><strong>Pontuação:</strong> <span class="puntos-usuario">150</span> pontos</p>
       </div>
 
       <div class="seccion-denuncias">
@@ -157,12 +161,12 @@
     </section>
   </main>
 
-    <footer>
-    <p>© 2026 Sapōto Todos os direitos reservados.</p>
+  <footer>
+    <p>© 2026 Sapōto. Todos os direitos reservados.</p>
   </footer>
 
-  <script>
-    // 1. LISTA DE USUARIOS Y SUS FOTOS (Verifica que los nombres de archivo coincidan con tu carpeta)
+    <script>
+    // 1. LISTA DE USUARIOS Y SUS FOTOS
     const usuariosValidos = [
       { usuario: "Eremika", contrasena: "Armin", foto: "eremika.jpg" },
       { usuario: "Enrico", contrasena: "1234", foto: "enrico.jpg" },
@@ -174,7 +178,7 @@
       return encontrado ? encontrado.foto : "logo.jpg";
     }
 
-    // 2. CARGA AUTOMÁTICA AL ABRIR O RECARGAR LA PÁGINA
+    // 2. CARGA AUTOMÁTICA AL ABRIR O RECARGAR
     window.onload = function() {
       cargarMensajesGuardados();
       const usuarioGuardado = localStorage.getItem('usuarioActivo');
@@ -185,7 +189,7 @@
       }
     };
 
-    // 3. INICIO DE SESIÓN
+    // 3. CONTROL DE SESIÓN
     function registrarUsuario(event) {
       event.preventDefault();
       const usuarioIngresado = document.getElementById('correo').value.trim();
@@ -209,11 +213,14 @@
       document.getElementById('perf-email').textContent = nombreUsuario;
       document.getElementById('perf-id').textContent = idUsuario;
       
-      // ESTA LÍNEA PONE LA FOTO CUADRADA EN EL PERFIL:
+      // Asigna la foto cuadrada en el Perfil
       const imgPerfil = document.getElementById('perf-foto');
       if (imgPerfil) {
         imgPerfil.src = obtenerFotoUsuario(nombreUsuario);
       }
+
+      // Carga los puntos individuales de ese usuario (inicia en 150)
+      actualizarPuntosEnPantalla(obtenerPuntosUsuario(nombreUsuario));
 
       document.getElementById('seccion-registro').style.display = 'none';
       document.getElementById('main-nav').style.display = 'flex';
@@ -266,7 +273,38 @@
       }
     }
 
-    // 5. CHAT CON FOTOS CIRCULARES Y HISTORIAL COMPARTIDO
+    // 5. SISTEMA DE PUNTOS Y CANJE DE PREMIOS
+    function obtenerPuntosUsuario(usuario) {
+      const guardados = localStorage.getItem('puntos_' + usuario);
+      return guardados !== null ? parseInt(guardados) : 150;
+    }
+
+    function guardarPuntosUsuario(usuario, nuevosPuntos) {
+      localStorage.setItem('puntos_' + usuario, nuevosPuntos);
+      actualizarPuntosEnPantalla(nuevosPuntos);
+    }
+
+    function actualizarPuntosEnPantalla(puntos) {
+      document.querySelectorAll('.puntos-usuario').forEach((el) => {
+        el.textContent = puntos;
+      });
+    }
+
+    function canjearPremio(costo, nombrePremio) {
+      const usuario = localStorage.getItem('usuarioActivo');
+      if (!usuario) return;
+
+      const puntosActuales = obtenerPuntosUsuario(usuario);
+      if (puntosActuales >= costo) {
+        const restantes = puntosActuales - costo;
+        guardarPuntosUsuario(usuario, restantes);
+        alert(`Cupom gerado para: ${nombrePremio}! Você agora tem ${restantes} pontos.`);
+      } else {
+        alert(`Pontos insuficientes! Você precisa de ${costo} pontos para resgatar este prêmio.`);
+      }
+    }
+
+    // 6. CHAT CON FOTOS CIRCULARES, VOTOS E HISTORIAL COMPARTIDO
     function enviarConEnter(event) {
       if (event.key === 'Enter') {
         enviarMensaje();
@@ -284,6 +322,10 @@
       const historial = JSON.parse(localStorage.getItem('historialChat')) || [];
       historial.push({ autor: nombreUsuario, texto: texto, hora: horaActual });
       localStorage.setItem('historialChat', JSON.stringify(historial));
+
+      // Suma +10 puntos por cada relato enviado
+      const nuevosPuntos = obtenerPuntosUsuario(nombreUsuario) + 10;
+      guardarPuntosUsuario(nombreUsuario, nuevosPuntos);
 
       dibujarMensajeEnPantalla(nombreUsuario, texto, horaActual);
       input.value = '';
@@ -304,15 +346,15 @@
       
       nuevoMensaje.innerHTML = `
         <div class="cabecera-mensaje">
-          <img src="${fotoAutor}" alt="${autor}" class="foto-chat-circular">
+          <img src="${fotoAutor}" onerror="this.src='logo.jpg'" alt="${autor}" class="foto-chat-circular">
           <strong>${autor}</strong>
           <span style="font-size: 0.75rem; color: #888;">(${hora})</span>
         </div>
         <p style="margin: 0 0 6px 0;">${texto}</p>
         <div class="verificacion-comunidad">
           <span>Isso é verdade?</span>
-          <button class="btn-voto sim" onclick="alert('Obrigado pelo voto!')">Sim</button>
-          <button class="btn-voto nao" onclick="alert('Relato sob análise de fraude.')">Não</button>
+          <button class="btn-voto sim" onclick="votarSim(this)">Sim (<span>0</span>)</button>
+          <button class="btn-voto nao" onclick="votarNao(this)">Não (<span>0</span>)</button>
         </div>
       `;
 
@@ -320,7 +362,23 @@
       cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
     }
 
-    // 6. MODO OSCURO
+    function votarSim(boton) {
+      const contador = boton.querySelector('span');
+      contador.textContent = parseInt(contador.textContent) + 1;
+    }
+
+    function votarNao(boton) {
+      const contador = boton.querySelector('span');
+      const votosNegativos = parseInt(contador.textContent) + 1;
+      contador.textContent = votosNegativos;
+
+      if (votosNegativos >= 3) {
+        alert('Relato falso removido pela comunidade!');
+        boton.closest('.mensaje').remove();
+      }
+    }
+
+    // 7. MODO OSCURO
     function alternarModoOscuro() {
       document.body.classList.toggle('dark-mode');
       const boton = document.getElementById('btn-modo-oscuro');
@@ -329,4 +387,3 @@
   </script>
 </body>
 </html>
-
